@@ -27,28 +27,28 @@ const Sidebar = ({ subCategories, onCategorySelect, onItemSelect, setAllCategori
     <nav className="sidebar">
       <ul className="md:flex-row flex-col gap-3">
         {subCategories?.map((subcategory) => (
-          <li key={subcategory.category_id} className="subcategory shadow-lg rounded-3xl p-2">
+          <li key={subcategory.sub_category_id} className="subcategory shadow-lg rounded-3xl p-2">
             <div
               className="subcategoryName  flex items-center justify-between p-3 cursor-pointer"
             >
-              <div className=" w-[90%]" onClick={() => handleCategoryClick(subcategory.category_id)}>
+              <div className=" w-[90%]" onClick={() => handleCategoryClick(subcategory.sub_category_id)}>
                 <Link
                   to="#"
                   onClick={(e) => e.preventDefault()}
                   className={`transition-all ease-in-out duration-200 text-lg font-semibold ${activeCategory === subcategory.category_id ? "border-t-[0.01vw]" : ""
-                    } ${activeCategory === subcategory.category_id ? "border-b-[0.01vw]" : ""} border-orange-500`}
+                    } ${activeCategory === subcategory.sub_category_id ? "border-b-[0.01vw]" : ""} border-orange-500`}
                 >
-                  {subcategory?.description}
+                  {subcategory?.sub_category_name}
                 </Link>
 
               </div>
               <MoreBtn
                  setallcategoryclose={setallcategoryclose}
-                isActive={activeCategory === subcategory.category_id}
+                isActive={activeCategory === subcategory.sub_category_id}
               />
             </div>
             <ul
-              className={`dropdown flex flex-col gap-1 px-2 transition-all duration-300 ease-in-out ${activeCategory === subcategory.category_id ? "block" : "hidden"
+              className={`dropdown flex flex-col gap-1 px-2 transition-all duration-300 ease-in-out ${activeCategory === subcategory.sub_category_id ? "block" : "hidden"
                 }`}
             >
               {subcategory.items?.map((item) => (
@@ -61,7 +61,7 @@ const Sidebar = ({ subCategories, onCategorySelect, onItemSelect, setAllCategori
                     setActiveItem(item.item_cd);
                   }}
                 >
-                  <span>{item?.name}</span>
+                  <span>{item?.item_name}</span>
                 </li>
               ))}
             </ul>

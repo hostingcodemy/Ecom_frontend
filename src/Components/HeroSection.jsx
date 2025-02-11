@@ -84,7 +84,6 @@ const HeroSection = () => {
 
     return (
         <div className='categoryShowcaseSection w-[100vw]  py-5 sm:px-20 px-10 gap-3 grid sm:grid-cols-12 grid-cols-1 items-center justify-center'>
-
             <div className="flex h-[100vh] w-[100%] flex-col sm:col-span-3 col-span-12 justify-between sm:ml-0 gap-2">
                 {catData.slice(0, 2).map((item, index) => (
                     <div key={index} className="BagsCategory h-[49%] w-[100%] relative">
@@ -95,7 +94,11 @@ const HeroSection = () => {
                                 handleButtonClick(item.category_id);
                             }}
                         >
-                            <img className='h-[100%] w-[100%] rounded-3xl' src="https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSGKarwVUFzOxvnL5gYrNOqaEwBFLtPHXROeczXsMmTLnbiGdtVNa_kA9iGDqRjhZ99ojEoWrtLmT0T7ejBPL8LmPOwP09DwdTygwPnTV6-_U4ZhhLUAFqatQ" alt="bagImg" />
+                            <img
+                                className='h-[100%] w-[100%] rounded-3xl'
+                                src={item.image}
+                                alt={item.category_name}
+                            />
                             <Btn title={item.category_name} />
                         </Link>
                     </div>
@@ -112,7 +115,11 @@ const HeroSection = () => {
                                 handleButtonClick(item.category_id);
                             }}
                         >
-                            <img className='h-[100%] w-[100%] rounded-3xl' src="https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSGKarwVUFzOxvnL5gYrNOqaEwBFLtPHXROeczXsMmTLnbiGdtVNa_kA9iGDqRjhZ99ojEoWrtLmT0T7ejBPL8LmPOwP09DwdTygwPnTV6-_U4ZhhLUAFqatQ" alt="bagImg" />
+                            <img
+                                className='h-[100%] w-[100%] rounded-3xl'
+                                src={item.image}
+                                alt={item.category_name}
+                            />
                             <Btn title={item.category_name} />
                         </Link>
                     </div>
@@ -129,13 +136,16 @@ const HeroSection = () => {
                                 handleButtonClick(item.category_id);
                             }}
                         >
-                            <img className='h-[100%] w-[100%] rounded-3xl' src="https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSGKarwVUFzOxvnL5gYrNOqaEwBFLtPHXROeczXsMmTLnbiGdtVNa_kA9iGDqRjhZ99ojEoWrtLmT0T7ejBPL8LmPOwP09DwdTygwPnTV6-_U4ZhhLUAFqatQ" alt="bagImg" />
+                            <img
+                                className='h-[100%] w-[100%] rounded-3xl'
+                                src={item.image}
+                                alt={item.category_name}
+                            />
                             <Btn title={item.category_name} />
                         </Link>
                     </div>
                 ))}
             </div>
-
         </div>
     )
 }

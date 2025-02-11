@@ -192,7 +192,7 @@ const CartPage = () => {
 
   useEffect(() => {
     const totalAmount = cartItems.reduce((total, item) => {
-      const price = item.isWholesale ? item.wsp_price : item.rp_price;
+      const price = item.isWholesale ? item.wsp : item.rp;
       return total + (price * item.quantity);
     }, 0);
 
@@ -278,7 +278,7 @@ const CartPage = () => {
   };
 
   const calculateTotalPrice = (item) => {
-    const price = item.isWholesale ? item.wsp_price : item.rp_price;
+    const price = item.isWholesale ? item.wsp : item.rp;
     return price * item.quantity;
   };
 
@@ -565,8 +565,10 @@ const CartPage = () => {
                     <div className="cartleft bg-red-400 w-[20%] flex justify-center items-center h-[7vh]">
                       <div className="cartImgWrapper h-[100%] w-[100%]">
                         <img
-                          src={item.photo}
-                          alt={item.name}
+                          src={item.
+                            item_images[0]}
+                          alt={item.item_name
+                          }
                           className="cart-item-image h-[100%] w-[100%]"
                         />
                       </div>
@@ -574,14 +576,15 @@ const CartPage = () => {
                     <div className="cartright w-[80%]">
                       <div className="cart-item-details w-[100%] flex justify-between">
                         <div className="textWrapper px-3">
-                          <h3 className=" text-[2vw] md:text-[0.8vw] font-semibold">{item.name}</h3>
+                          <h3 className=" text-[2vw] md:text-[0.8vw] font-semibold">{item.item_name
+                          }</h3>
                           <p className="md:text-[0.7vw] text-[2vw]">
                             <strong></strong>
                             {item.isWholesale
                               ? "Wholesale Price: "
                               : "Retail Price: "}
                             &#8377;
-                            {item.isWholesale ? item.wsp_price : item.rp_price}
+                            {item.isWholesale ? item.wsp : item.rp}
                           </p>
                           <div className="quantity-controls flex w-[15vw] md:w-[6vw] h-[3vh]  rounded-2xl py-2 cursor-pointer items-center justify-between">
                             <button

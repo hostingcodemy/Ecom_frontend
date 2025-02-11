@@ -26,7 +26,7 @@ const ProductCard = ({ subCategories, selectedCategoryId, selectedItemCd, allCat
           .filter((item) => item.item_cd === selectedItemCd)
         : selectedCategoryId
           ? subCategories
-            .find((category) => category.category_id === selectedCategoryId)
+            .find((category) => category.sub_category_id === selectedCategoryId)
             ?.items || []
           : subCategories.flatMap((category) => category.items);
 
@@ -57,9 +57,9 @@ const ProductCard = ({ subCategories, selectedCategoryId, selectedItemCd, allCat
               <div className="product-showcase flex flex-col gap-3 h-[25vh] md:h-[48vh] w-[100%]">
                 <div className="imgWrapper relative h-[65%]">
                   <img
-                   onClick={() => navigate(`/product/${item.item_cd}`, { state: { itemDetails: item } })}
-                    src={item.photo}
-                    alt={item.name}
+                   onClick={() => navigate(`/product/${item.item_cd}`, { state: { details: item } })}
+                    src={item.item_images[0]}
+                    alt={item.item_name}
                     className="product-image rounded-tl-2xl rounded-tr-2xl h-[100%] w-[100%]"
                   />
                   <div
@@ -74,8 +74,9 @@ const ProductCard = ({ subCategories, selectedCategoryId, selectedItemCd, allCat
                   </div>
                 </div>
                 <div className="product-info">
-                  <h3 className="text-[4.5vw] md:text-[1.5vw] md:text-left text-center">{item.name}</h3>
-                  <p className="text-[3w] md:text-[1vw] md:text-left text-center">{item.description || "Tea Product"}</p>
+                  <h3 className="text-[4.5vw] md:text-[1.3vw] md:text-left text-center">{item.item_name
+                  }</h3>
+                  <p className="text-[3w] md:text-[0.65vw] font-light md:text-left text-center">{item.details || "Tea Product"}</p>
                   <p className="flex items-center justify-center md:justify-start w-[100%] md:text-[1vw] text-[2vw]">
                     Rating:
                     <span className="flex ml-2">
@@ -93,15 +94,15 @@ const ProductCard = ({ subCategories, selectedCategoryId, selectedItemCd, allCat
                 </div>
               </div>
 
-              <div className="product-price flex flex-col w-[100%] gap-1">
-                <p className="text-center md:text-left">
-                  <strong className="md:text-[1vw] text-[3vw]">Retail Price: </strong>&#8377;{item.rp_price}
+              <div className="product-price flex flex-col w-[100%]">
+                <p className="text-center md:text-left md:text-[0.9vw]">
+                  <strong className="md:text-[0.9vw] text-[3vw]">Retail Price: </strong>&#8377;{item.rp}
                 </p>
-                <p className="text-center md:text-left">
-                  <strong className="md:text-[1vw] text-[3vw]">Wholesale Price: </strong>&#8377;{item.wsp_price}
+                <p className="text-center md:text-left md:text-[0.9vw]">
+                  <strong className="md:text-[0.9vw] text-[3vw]">Wholesale Price: </strong>&#8377;{item.wsp}
                 </p>
                 <button
-                  className="view-price-button w-[100%] flex px-3 py-1 bg-yellow-50 border-[#3f3c23] border-[0.01vw] justify-center items-center text-[#020202] rounded-3xl hover:bg-[#FBBF10] hover:text-white hover:font-semibold transition-all ease-in-out duration-500 mt-3"
+                  className="view-price-button w-[100%] flex px-3 py-1 bg-yellow-50 border-[#3f3c23] border-[0.01vw] justify-center items-center text-[#020202] rounded-3xl hover:bg-[#FBBF10] hover:text-white hover:font-semibold transition-all ease-in-out duration-500 mt-1"
                   onClick={() => navigate(`/product/${item.item_cd}`, { state: { itemDetails: item } })}
                 >
                   View Price

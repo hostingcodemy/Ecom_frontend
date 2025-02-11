@@ -8,7 +8,7 @@ export const CartProvider = ({ children }) => {
   const [isLogIn, setIsLogIn] = useState(false);
   const [isWholesale, setIsWholesale] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [orderDetails, setOrderDetails] = useState([]) //for order sucessfull and order id and sts 
+  const [orderDetails, setOrderDetails] = useState([]) 
 
   const addToCart = (product, quantity, isWholesale) => {
     setCartItems((prevItems) => {

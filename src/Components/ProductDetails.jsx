@@ -32,12 +32,12 @@ const ProductDetail = () => {
     const type = isWholesale ? "Wholesale" : "Retail";
     const date = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
-    const price = isWholesale ? product.wsp_price : product.rp_price;
+    const price = isWholesale ? product.wsp : product.rp;
 
     const cartItem = {
-      productId: product.id,
+      productId: product.item_id,
       itemId: product.item_cd,
-      productName: product.name,
+      productName: product.item_name,
       quantity: quantity,
       isWholesale: isWholesale,
       type: type,
@@ -49,7 +49,7 @@ const ProductDetail = () => {
     existingCartItems.push(cartItem);
     localStorage.setItem('cartItems', JSON.stringify(existingCartItems));
 
-    toast.success(`${product.name} added to cart successfully!`, {
+    toast.success(`${product.item_name} added to cart successfully!`, {
       progressStyle: {
         backgroundColor: "#FF6547",
       },
@@ -65,7 +65,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     if (product) {
-      const price = isWholesale ? product.wsp_price : product.rp_price
+      const price = isWholesale ? product.wsp : product.rp
       setTotalPrice(price * quantity)
     }
   }, [product, quantity, isWholesale]);
@@ -90,12 +90,12 @@ const ProductDetail = () => {
     <div className="product-detail p-10 flex flex-col gap-3">
       <div className="productDetailsWrapper w-[100%] flex-col md:flex-row flex">
         <div className="productDetailsLeft h-[100%]  flex flex-col w-[100%] md:w-[50%]">
-          <ProductGallery image={itemDetails.photo}/>
+          <ProductGallery image={itemDetails.item_images[0]}/>
         </div>
 
         <div className="productDetailsRight p-10 flex flex-col items-center w-[100%] md:w-[50%] gap-2">
           <h2 className="text-center text-[9vw] md:text-[5vw] tracking-tight" style={{ color: `${itemDetails.color}` }}>
-            {itemDetails.name}
+            {itemDetails.item_name}
           </h2>
 
           <div className="product-price-section flex gap-5 rounded-full border-[0.01vw] border-black items-center p-5">
@@ -111,8 +111,8 @@ const ProductDetail = () => {
             <p className="md:text-[1.2vw] flex items-center text-[2vw] gap-2">
               <strong>Price: </strong>
               <span className='flex items-center gap-1'>
-                <p className='flex justify-center rounded-3xl font-semibold text-[#FBBF10]'>{isWholesale ? 'Wholesale' : 'Retail'} :</p>
-                &#8377;{isWholesale ? itemDetails.wsp_price : itemDetails.rp_price}
+                <p className='flex justify-center rounded-3xl font-semibold text-[#00F866]'>{isWholesale ? 'Wholesale' : 'Retail'} :</p>
+                &#8377;{isWholesale ? itemDetails.wsp : itemDetails.rp}
               </span>
             </p>
 
@@ -136,7 +136,7 @@ const ProductDetail = () => {
 
           <div className="total-price mt-3">
             <p>
-              <strong>Total Price: </strong><span className='text-[#FBBF10] font-semibold '>&#8377;{totalPrice}</span>
+              <strong>Total Price: </strong><span className='text-[#00F866] font-semibold '>&#8377;{totalPrice}</span>
             </p>
           </div>
 
@@ -145,8 +145,8 @@ const ProductDetail = () => {
           </div>
 
           <div className="product-detail-header mt-5 py-3 border-t-[0.1vw] border-[#FBBF10]">
-            <div className="product-description">
-              <p>Description: {itemDetails.description}</p>
+            <div className="product-description text-center text-[1vw]">
+              <p><strong className='text-[#FBBF10]'>Description</strong>: {itemDetails.details}</p>
             </div>
           </div>
         </div>

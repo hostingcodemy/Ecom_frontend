@@ -236,7 +236,7 @@ const Nav = () => {
       </div>
       <div className="navRow1 h-[9vh] border-b-2 border-zinc-200 w-[100%] px-4 flex items-center justify-between">
         <div className="navRow1Left md:block hidden w-[37%] relative">
-          <ul className='flex cursor-pointer items-center gap-3 font-normal'>
+          <ul className='flex cursor-pointer items-center text-[1vw] gap-3 font-normal'>
             {catData?.map((category) => (
               <>
                 <li key={category.category_id} className={`${category.category_id === 6 ? 'hidden' : 'inline-block'
@@ -264,13 +264,13 @@ const Nav = () => {
           <ul className="flex gap-4 categorycont">
             {subCatData.map((item, index) => (
               <li key={index} className="space-y-2">
-                <div className=" font-semibold text-center text-[1vw] text-zinc-700 bg-yellow-400 rounded-xl">{item.description}</div>
+                <div className=" font-semibold text-center text-[1vw] text-zinc-700 bg-yellow-400 rounded-xl">{item.sub_category_name}</div>
                 <ul className="h space-y-2 border-t-[0.01vw] border-b-[0.2vw] hover:border-t-yellow-400 hover:border-b-yellow-400 border-b-zinc-200 pb-[0.2vw]">
                   <div className='hover:border-b-yellow-400  border-b-[0.01vw] border-b-zinc-200 p-2'>
                     {item.items.map((value, idx) => (
                       <li key={idx} className="hover:border-b-yellow-400 text-[0.8vw] text-center text-zinc-600 hover:text-yellow-400 cursor-pointer flex items-center justify-start mb-2 gap-2">
-                        <span className='inline-block h-10 w-10'><img className='h-[100%] w-[100%] rounded-lg' src={value.photo} alt="" /></span>
-                        <span className='text-left'>{value.name}</span>
+                        <span className='inline-block h-10 w-10'><img className='h-[100%] w-[100%] rounded-lg' src={value.item_images[0]} alt="" /></span>
+                        <span className='text-left'>{value.item_name}</span>
                       </li>
                     ))}
                   </div>
