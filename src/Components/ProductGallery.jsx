@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 
 const ProductGallery = ({ image }) => {
-    const [mainImage, setMainImage] = useState(image);
+
+    const [mainImage, setMainImage] = useState(image[0]);
     const [thumbnailPosition, setThumbnailPosition] = useState({
         top: 0,
         left: 0,
@@ -18,10 +19,10 @@ const ProductGallery = ({ image }) => {
         const containerRect = mainImageRef.current.getBoundingClientRect();
 
         setThumbnailPosition({
-            top: rect.top - containerRect.top-98,
-            left: rect.left - containerRect.left+84,
-            width: rect.width+7,
-            height: rect.height+7,
+            top: rect.top - containerRect.top - 98,
+            left: rect.left - containerRect.left + 84,
+            width: rect.width + 7,
+            height: rect.height + 7,
         });
     };
 
@@ -32,7 +33,7 @@ const ProductGallery = ({ image }) => {
 
     useEffect(() => {
         const handleResize = () => {
-            const index = [image].indexOf(mainImage);
+            const index = [image[0]].indexOf(mainImage);
             if (index !== -1) {
                 calculatePosition(index);
             }
@@ -46,17 +47,24 @@ const ProductGallery = ({ image }) => {
     }, [mainImage]);
 
     useEffect(() => {
-        const index = [image].indexOf(mainImage);
+        const index = [image[0]].indexOf(mainImage);
 
         if (index !== -1) {
             calculatePosition(index);
         }
-    }, [mainImage, image]); 
+
+    }, [mainImage, image]);
+
+    useEffect(() => {
+        if (image && image.length > 0) {
+            setMainImage(image[0]);
+        }
+    }, [image]);
 
     return (
         <div className="flex items-center space-x-6 ml-5">
             <div className="flex flex-col space-y-4 relative">
-                <div
+                {/* <div
                     className="emptyDiv absolute border-[0.1vw] border-orange-400 rounded-lg transition-all duration-500 ease-in-out z-30"
                     style={{
                         top: thumbnailPosition.top,
@@ -64,16 +72,16 @@ const ProductGallery = ({ image }) => {
                         width: thumbnailPosition.width,
                         height: thumbnailPosition.height,
                     }}
-                ></div>
+                ></div> */}
 
                 <div
                     ref={(el) => (thumbnailRefs.current[0] = el)}
                     className="relative transition-all duration-300 ease-in-out w-16 h-16"
-                    onClick={() => changeImage(image, 0)}
+                    onClick={() => changeImage(image[0], 0)}
                 >
                     <img
                         className=" cursor-pointer rounded-md h-[100%] w-[100%]"
-                        src={image}
+                        src={image[0]}
                         alt="Thumbnail 1"
                     />
                 </div>
@@ -81,11 +89,11 @@ const ProductGallery = ({ image }) => {
                 <div
                     ref={(el) => (thumbnailRefs.current[1] = el)}
                     className="relative transition-all duration-300 ease-in-out w-16 h-16"
-                    onClick={() => changeImage(image, 1)}
+                    onClick={() => changeImage(image[1], 1)}
                 >
                     <img
                         className=" cursor-pointer rounded-md h-[100%] w-[100%]"
-                        src={image}
+                        src={image[1]}
                         alt="Thumbnail 2"
                     />
                 </div>
@@ -93,17 +101,17 @@ const ProductGallery = ({ image }) => {
                 <div
                     ref={(el) => (thumbnailRefs.current[2] = el)}
                     className="relative transition-all duration-300 ease-in-out w-16 h-16"
-                    onClick={() => changeImage(image, 2)}
+                    onClick={() => changeImage(image[2], 2)}
                 >
                     <img
                         className=" cursor-pointer rounded-md h-[100%] w-[100%]"
-                        src={image}
+                        src={image[2]}
                         alt="Thumbnail 3"
                     />
                 </div>
             </div>
 
-            <div ref={mainImageRef} className="flex-1 w-[70vw] h-[70vh]  rounded-xl">
+            <div ref={mainImageRef} className="mainImage flex-1 w-[70vw] h-[70vh]  rounded-xl">
                 <img
                     className="w-[100%] h-[100%] object-contain rounded-xl"
                     src={mainImage}

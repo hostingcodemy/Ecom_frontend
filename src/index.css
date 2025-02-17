@@ -11,7 +11,6 @@ body {
 
 .App {
   font-family: Arial, sans-serif;
-  margin: 20px;
 }
 
 
@@ -302,4 +301,44 @@ body {
     box-shadow: -80px 0 0 80px #ffd500;
   }
 
+}
+
+.breadcrumb {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #F3F4F6, #E2E8F0);
+  padding: 12px 24px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.breadcrumb a {
+  position: relative;
+  padding: 0 10px;
+  border-radius: 6px;
+}
+
+.breadcrumb a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  background: #2563eb;
+  bottom: -5px;
+  left: 0;
+  transition: width 0.3s ease;
+}
+
+.breadcrumb a:hover::after {
+  width: 100%;
+}
+
+.breadcrumb .text-gray-600 {
+  font-weight: bold;
+}
+
+
+.category::-webkit-scrollbar{
+  display: none;
 }

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import MoreBtn from "./MoreBtn";
 
 const Sidebar = ({ subCategories, onCategorySelect, onItemSelect, setAllCategoriesClosed }) => {
   const [activeCategory, setActiveCategory] = useState(null);
@@ -42,10 +41,19 @@ const Sidebar = ({ subCategories, onCategorySelect, onItemSelect, setAllCategori
                 </Link>
 
               </div>
-              <MoreBtn
-                 setallcategoryclose={setallcategoryclose}
-                isActive={activeCategory === subcategory.sub_category_id}
-              />
+
+
+
+              <div
+                onClick={() => activeCategory === null ? handleCategoryClick(subcategory.sub_category_id) : setallcategoryclose()}
+                className='moreBtn p-3 flex items-center justify-center  relative'
+              >
+                <span className={`line1 absolute bg-zinc-950 h-[1vw] p-[0.1vw] ${activeCategory === subcategory.sub_category_id ? 'rotate-90' : ''} transition-all ease-in-out duration-500`}></span>
+                <span className='line2 absolute bg-zinc-950 rotate-[90deg] h-[1vw] p-[0.1vw]'></span>
+              </div>
+
+
+
             </div>
             <ul
               className={`dropdown flex flex-col gap-1 px-2 transition-all duration-300 ease-in-out ${activeCategory === subcategory.sub_category_id ? "block" : "hidden"

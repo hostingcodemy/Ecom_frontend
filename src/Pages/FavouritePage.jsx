@@ -23,7 +23,8 @@ const FavouritePage = () => {
                             <div className="product-showcase flex flex-col gap-3 h-[25vh] md:h-[48vh] w-[100%]">
                                 <div className="imgWrapper relative h-[65%]">
                                     <img
-                                        src={item.photo}
+                                        src={item.item_images[2]
+                                        }
                                         alt={item.name}
                                         className="product-image rounded-tl-2xl rounded-tr-2xl h-[100%] w-[100%]"
                                     />
@@ -35,8 +36,8 @@ const FavouritePage = () => {
                                 </div>
                                 </div>
                                 <div className="product-info">
-                                    <h3 className="text-[4.5vw] md:text-[1.5vw] md:text-left text-center">{item.name}</h3>
-                                    <p className="text-[3w] md:text-[1vw] md:text-left text-center">{item.description || "Tea Product"}</p>
+                                    <h3 className="text-[4.5vw] md:text-[1.5vw] md:text-left text-center">{item.item_name}</h3>
+                                    <p className="text-[3w] md:text-[0.7vw] md:text-left text-center">{item.details || "Tea Product"}</p>
                                     <p
                                         className="flex items-center justify-center md:justify-start w-[100%] md:text-[1vw] text-[2vw]"
                                     >
@@ -47,10 +48,10 @@ const FavouritePage = () => {
 
                             <div className="product-price flex flex-col w-[100%] gap-1">
                                 <p className="text-center md:text-left">
-                                    <strong className="md:text-[1vw] text-[3vw]">Retail Price: </strong>&#8377;{item.rp_price}
+                                    <strong className="md:text-[1vw] text-[3vw]">Retail Price: </strong>&#8377;{item.rp}
                                 </p>
                                 <p className="text-center md:text-left">
-                                    <strong className="md:text-[1vw] text-[3vw]">Wholesale Price: </strong>&#8377;{item.wsp_price}
+                                    <strong className="md:text-[1vw] text-[3vw]">Wholesale Price: </strong>&#8377;{item.wsp}
                                 </p>
                             </div>
 

@@ -5,7 +5,7 @@ import { useCart } from "../Context/CartContext";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { API_CUSTOMER_REGISTER } from "../config/Api";
-import { MdOutlineAccountCircle } from "react-icons/md";
+import { VscAccount } from "react-icons/vsc";
 
 const SignUpPage = () => {
     const navigate = useNavigate();
@@ -205,15 +205,16 @@ const SignUpPage = () => {
 
     return (
         <div className=" pb-20 flex justify-center items-center">
-            <div className="bg-gradient-to-r from-[#f0f0f0] to-[#f3f3f3] rounded-lg shadow-lg w-full max-w-5xl p-6 space-y-2 mt-3">
-                <h1 className="text-3xl font-semibold text-center text-gray-700 mb-6">Sign Up</h1>
+            <div className="border-yellow-400 border-[0.01vw]  rounded-lg shadow-lg w-full max-w-5xl p-6 space-y-2 mt-3">
+                <h1 className="text-3xl font-semibold text-center text-gray-700 mb-6">Sign <span className="text-yellow-400">Up</span></h1>
 
                 <div className="space-y-3">
 
                     <div className="signupTop grid grid-cols-12 border-b-[#FFBE59]">
-                        <div className="left col-span-10 md:col-span-11">
-                            <div className="wrapper grid grid-cols-3 md:grid-cols-4 gap-3">
-                                <div>
+                        <div className="left col-span-10 md:col-span-10">
+                            <div className="wrapper grid grid-cols-1 gap-y-5">
+                               <div className=" grid grid-cols-4 gap-3">
+                               <div>
                                     <input
                                         type="text"
                                         placeholder="First Name"
@@ -263,7 +264,7 @@ const SignUpPage = () => {
                                         {errors.phone}
                                     </div>
                                 </div>
-                                <div>
+                                {/* <div>
                                     <input
                                         type="text"
                                         placeholder="Enter OTP"
@@ -284,7 +285,7 @@ const SignUpPage = () => {
                                     <div className="text-red-500 text-sm">
                                         {errors.phone}
                                     </div>
-                                </div>
+                                </div> */}
                                 <div>
                                     <input
                                         type="text"
@@ -299,7 +300,7 @@ const SignUpPage = () => {
                                         {errors.email}
                                     </div>
                                 </div>
-                                <div>
+                                {/* <div>
                                     <input
                                         type="text"
                                         placeholder="Enter OTP"
@@ -312,8 +313,11 @@ const SignUpPage = () => {
                                     <div className="text-red-500 text-sm">
                                         {errors.email}
                                     </div>
-                                </div>
-                                <div>
+                                </div> */}
+                               </div>
+
+                                <div className="grid grid-cols-12 gap-x-2">
+                                <div className="grid col-span-4 ">
                                     <input
                                         type="text"
                                         placeholder="Password"
@@ -327,13 +331,22 @@ const SignUpPage = () => {
                                         {errors.password}
                                     </div>
                                 </div>
+                                <div className="w-[100%] h-[100%] grid col-span-8 ">
+                                    <div className="w-[100%] h-[100%]  flex justify-center items-center">
+                                        <span className="bg-yellow-400 rounded-xl w-[100%] h-[0.2vw] inline-block"></span>
+                                    </div>
+                                </div>
+                                </div>
                             </div>
                         </div>
-                        <div className="right col-span-2 md:col-span-1">
-                            <div className="w-[100%] h-[100%] flex flex-col items-center justify-start md:justify-center">
-                                <MdOutlineAccountCircle className="text-[10vw] md:text-[2.5vw]" onClick={handleClick} />
-                                <p onClick={handleClick} className="text-[2vw] md:text-[0.7vw] text-yellow-400 cursor-pointer">Upload Photo</p>
+                        <div className="right col-span-2 md:col-span-2">
+                            <div className=" h-[100%] flex  justify-center items-center">
+                                <div className="border-yellow-500 border-[0.01vw] py-1 px-3 flex flex-col items-center justify-center">
+                                <VscAccount  className="text-[10vw] md:text-[6vw]" onClick={handleClick} />
+                                <p onClick={handleClick} className="text-[2vw] md:text-[0.9vw] text-yellow-400 cursor-pointer">Upload Photo</p>
+                                </div>
                             </div>
+
                         </div>
                     </div>
 
@@ -345,8 +358,15 @@ const SignUpPage = () => {
                                 placeholder="Pin Code"
                                 name="P_pinCode"
                                 value={formValues.P_pinCode || ""}
-                                onChange={(event) => handleChange("P_pinCode", event.target.value)}
+                                onChange={(event) => {
+                                    const value = event.target.value;
+                                    if (!/^\d*$/.test(value)) {
+                                        return;
+                                    }
+                                    handleChange("P_pinCode", value);
+                                }}
                                 autoComplete="off"
+                                maxLength={6}
                                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-300"
                             />
                             <div className="text-red-500 text-sm">
@@ -448,8 +468,15 @@ const SignUpPage = () => {
                                 type="text"
                                 placeholder="Pin Code"
                                 name="D_pinCode"
+                                maxLength={6}
                                 value={formValues.D_pinCode || ""}
-                                onChange={(event) => handleChange("D_pinCode", event.target.value)}
+                                onChange={(event) => {
+                                    const value = event.target.value;
+                                    if (!/^\d*$/.test(value)) {
+                                        return;
+                                    }
+                                    handleChange("D_pinCode", value);
+                                }}
                                 autoComplete="off"
                                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-300"
                             />

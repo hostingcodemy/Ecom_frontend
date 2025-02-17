@@ -24,6 +24,9 @@ export const API_PLACE_ORDER = API_DOMAIN + "place-order";
 //order history
 export const API_ALL_ORDERS = API_DOMAIN + "all-orders";
 
+//
+export const API_CATEGORY = API_DOMAIN + "category";
+
 
 
 

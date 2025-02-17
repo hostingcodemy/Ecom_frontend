@@ -1,41 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IoIosSearch } from "react-icons/io";
 
 const ProductFilters = ({ filteredItems, onFilteredItemsChange, originalItems }) => {
   const [searchName, setSearchName] = useState('');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 10000 });
 
-  const handleSearchChange = (e) => {
-    const name = e.target.value;
-    setSearchName(name);
+  const applyFilters = () => {
 
-    if (name === '') {
-      onFilteredItemsChange(originalItems);
-    } else {
-      const filtered = originalItems.filter((item) =>
-        item.name.toLowerCase().includes(name.toLowerCase())
+    let filtered = [...originalItems];
+
+    if (searchName !== '') {
+      filtered = filtered.filter((item) =>
+        item.item_name.toLowerCase().includes(searchName.toLowerCase())
       );
-      onFilteredItemsChange(filtered);
     }
-  };
 
-  const handlePriceChange = (e) => {
-    const value = e.target.value;
-    const max = Math.floor(value / 1000) * 1000 + 1000;
-    setPriceRange({ min: value, max });
-
-
-    const filtered = originalItems.filter(
-      (item) => item.rp_price >= value && item.rp_price <= max
+    filtered = filtered.filter(
+      (item) => item.wsp >= priceRange.min && item.wsp <= priceRange.max
     );
-
 
     onFilteredItemsChange(filtered);
   };
 
+  const handleSearchChange = (e) => {
+    const name = e.target.value;
+    setSearchName(name);
+
+  };
+
+  const handlePriceRangeChange = (e) => {
+    const { name, value } = e.target;
+    setPriceRange((prev) => ({
+      ...prev,
+      [name]: parseInt(value),
+    }));
+  };
+
+  useEffect(() => {
+    applyFilters();
+  }, [searchName, priceRange, originalItems]);
+
   return (
     <div className="filters justify-between md:ml-2 md:gap-9 md:justify-start items-end flex gap-3">
-      {/* Search input */}
       <div className='py-1 px-1 flex gap-2 items-center justify-between border-[0.01vw] border-yellow-400 rounded-full'>
         <div className='searchIcon p-1 flex items-center justify-center bg-yellow-100 rounded-full'>
           <IoIosSearch size={20} />
@@ -49,16 +55,28 @@ const ProductFilters = ({ filteredItems, onFilteredItemsChange, originalItems })
         />
       </div>
 
-      {/* Price range input */}
       <div className='flex flex-col justify-between items-center'>
-        <input
-          type="range"
-          min={0}
-          max={10000}
-          value={priceRange.min}
-          step={1000}
-          onChange={handlePriceChange}
-        />
+        <div className="flex md:flex-row  items-center flex-col gap-2 md:gap-3">
+
+          <input
+            type="range"
+            name="min"
+            min={0}
+            max={priceRange.max}
+            value={priceRange.min}
+            step={1000}
+            onChange={handlePriceRangeChange}
+          />
+          <input
+            type="range"
+            name="max"
+            min={priceRange.min}
+            max={10000}
+            value={priceRange.max}
+            step={1000}
+            onChange={handlePriceRangeChange}
+          />
+        </div>
         <p className='md:text-[1vw] text-[3vw] flex gap-3'>
           <span>₹{priceRange.min}</span> - <span>₹{priceRange.max}</span>
         </p>
@@ -68,4 +86,3 @@ const ProductFilters = ({ filteredItems, onFilteredItemsChange, originalItems })
 };
 
 export default ProductFilters;
-

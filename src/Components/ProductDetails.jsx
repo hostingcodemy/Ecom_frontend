@@ -8,26 +8,28 @@ import ProductGallery from './ProductGallery';
 
 const ProductDetail = () => {
   const location = useLocation();
-  const { itemDetails } = location.state || {};
+  const { details } = location.state || {};  // This should be checked for being undefined
   const { addToCart, cartCount, setCartCount, isWholesale, setIsWholesale } = useCart();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
 
+  // Check if the details are available
   useEffect(() => {
-    if (itemDetails) {
-      setProduct(itemDetails);
+    if (details && details.item_images) {
+      setProduct(details);
     } else {
-      console.log("Product not found");
+      console.log("Product not found or item_images missing");
     }
-  }, [itemDetails]);
-
-
-
+  }, [details]);
 
   const handleAddToCart = () => {
+    if (!product) {
+      toast.error("Product details are missing!");
+      return;
+    }
+
     addToCart(product, quantity, isWholesale);
-    setCartCount(cartCount + quantity);
 
     const type = isWholesale ? "Wholesale" : "Retail";
     const date = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
@@ -35,18 +37,34 @@ const ProductDetail = () => {
     const price = isWholesale ? product.wsp : product.rp;
 
     const cartItem = {
-      productId: product.item_id,
-      itemId: product.item_cd,
-      productName: product.item_name,
+      item_cd: product.item_cd,
+      item_id: product.item_id,
+      item_name: product.item_name,
       quantity: quantity,
       isWholesale: isWholesale,
       type: type,
       date: date,
       price: price,
+      details: product.details,
+      rating: product.rating,
+      rp: product.rp,
+      wsp: product.wsp,
+      is_stock: product.is_stock,
+      item_images: product.item_images,
     };
 
-    const existingCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-    existingCartItems.push(cartItem);
+    let existingCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+    const itemIndex = existingCartItems.findIndex(
+      (item) => item.item_cd === cartItem.item_cd && item.item_id === cartItem.item_id
+    );
+
+    if (itemIndex !== -1) {
+      existingCartItems[itemIndex].quantity = cartItem.quantity;
+    } else {
+      existingCartItems.push(cartItem);
+    }
+
     localStorage.setItem('cartItems', JSON.stringify(existingCartItems));
 
     toast.success(`${product.item_name} added to cart successfully!`, {
@@ -54,6 +72,8 @@ const ProductDetail = () => {
         backgroundColor: "#FF6547",
       },
     });
+
+    setCartCount(existingCartItems.length)
   };
 
   const togglePriceType = () => {
@@ -86,16 +106,21 @@ const ProductDetail = () => {
     setQuantity((prevQuantity) => (prevQuantity > 1 ? prevQuantity - 1 : 1));
   };
 
+  if (!product || !product.item_images) {
+    // Show a loading spinner or a message when product details are still unavailable
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="product-detail p-10 flex flex-col gap-3">
       <div className="productDetailsWrapper w-[100%] flex-col md:flex-row flex">
         <div className="productDetailsLeft h-[100%]  flex flex-col w-[100%] md:w-[50%]">
-          <ProductGallery image={itemDetails.item_images[0]}/>
+          <ProductGallery image={product.item_images} />
         </div>
 
         <div className="productDetailsRight p-10 flex flex-col items-center w-[100%] md:w-[50%] gap-2">
-          <h2 className="text-center text-[9vw] md:text-[5vw] tracking-tight" style={{ color: `${itemDetails.color}` }}>
-            {itemDetails.item_name}
+          <h2 className="text-center text-[9vw] md:text-[3vw] tracking-tight" style={{ color: `${product.color}` }}>
+            {product.item_name}
           </h2>
 
           <div className="product-price-section flex gap-5 rounded-full border-[0.01vw] border-black items-center p-5">
@@ -112,26 +137,33 @@ const ProductDetail = () => {
               <strong>Price: </strong>
               <span className='flex items-center gap-1'>
                 <p className='flex justify-center rounded-3xl font-semibold text-[#00F866]'>{isWholesale ? 'Wholesale' : 'Retail'} :</p>
-                &#8377;{isWholesale ? itemDetails.wsp : itemDetails.rp}
+                &#8377;{isWholesale ? product.wsp : product.rp}
               </span>
             </p>
 
           </div>
 
-          <div className="quantity-section border-[0.01vw] items-center px-5 py-1 border-black flex rounded-full">
-            <label htmlFor="quantity" className="mr-5">Quantity:</label>
+          <div className='flex gap-2 items-center'>
+            <div className="quantity-section border-[0.01vw] items-center px-5 py-1 border-black flex rounded-full">
+              <label htmlFor="quantity" className="mr-5">Quantity:</label>
 
-            <button onClick={handleDecrement}>-</button>
+              <button onClick={handleDecrement}>-</button>
 
-            <input
-              type="text"
-              id="quantity"
-              value={quantity}
-              onChange={handleQuantityChange}
-              className="quantity-input bg-transparent text-center w-12"
-            />
+              <input
+                type="text"
+                id="quantity"
+                value={quantity}
+                onChange={handleQuantityChange}
+                className="quantity-input bg-transparent text-center w-12"
+              />
 
-            <button onClick={handleIncrement}>+</button>
+              <button onClick={handleIncrement}>+</button>
+            </div>
+            {product.is_stock === 1 ? (
+              <div className="top-0 right-10 gap-1 flex text-[0.8vw] font-thin"><span className="bg-green-400 px-1 rounded-sm font-normal">IN</span>STOCK</div>
+            ) : (
+              <div className="top-0 right-10 gap-1 flex text-[0.8vw] font-thin">OUT OF<span className="bg-red-500 text-white px-1 rounded-sm font-normal">STOCK</span></div>
+            )}
           </div>
 
           <div className="total-price mt-3">
@@ -140,18 +172,18 @@ const ProductDetail = () => {
             </p>
           </div>
 
-          <div className="product-actions flex px-3 bg-yellow-50 border-[#3f3c23] border-[0.01vw] justify-start items-start text-[#020202] rounded-3xl hover:bg-[#FBBF10] transition-all ease-in-out duration-500 hover:text-white hover:font-semibold">
-            <button onClick={handleAddToCart}>Add to Cart</button>
+          <div className={`product-actions flex px-3 bg-yellow-50 border-[#3f3c23] border-[0.01vw] justify-start items-start text-[#020202] rounded-3xl transition-all ease-in-out duration-500 ${product.is_stock === 1 ? "hover:text-black" : ""} ${product.is_stock === 1 ? "hover:font-semibold" : ""}  ${product.is_stock === 1 ? "hover:bg-[#FBBF10]" : ""}`}>
+            <button onClick={() => product.is_stock === 1 ? handleAddToCart() : null}>Add to Cart</button>
           </div>
 
-          <div className="product-detail-header mt-5 py-3 border-t-[0.1vw] border-[#FBBF10]">
-            <div className="product-description text-center text-[1vw]">
-              <p><strong className='text-[#FBBF10]'>Description</strong>: {itemDetails.details}</p>
+          <div className="product-detail-header text-[1vw] mt-5 py-3 border-t-[0.1vw] border-[#FBBF10]">
+            <div className="product-descriptionv text-center">
+              <p><strong className='text-[#FBBF10]'>Description:</strong> {product.details}</p>
             </div>
           </div>
         </div>
       </div>
-      <SimilarProducts />
+
       <ToastContainer
         position="top-right"
         autoClose={1000}

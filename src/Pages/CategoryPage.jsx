@@ -16,7 +16,7 @@ const CategoryPage = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
 
   useEffect(() => {
-    const filtered = subCategories.find((data) => data.description === category);
+    const filtered = subCategories.find((data) => data.item_name === category);
     if (filtered) {
       let items = filtered.items;
       if (subcategory) {

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../Context/CartContext';
 import { IoClose } from "react-icons/io5";
 import { VscAccount } from "react-icons/vsc";
@@ -13,17 +13,23 @@ import {
   from '../config/Api';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { FaPlus } from "react-icons/fa";
 
 const CartPage = () => {
-
+  const [redeemBalance, setRedeemBalance] = useState(5000);
+  const [previousValue, setPreviousValue] = useState(1000);
+  const [redeemValue, setRedeemValue] = useState(0);
+  const [availableValue, setAvailableValue] = useState(0);
+  const [finalRedeemValue, setFinalRedeemValue] = useState(0);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const custId = localStorage.getItem('_id');
   const isLogin = localStorage.getItem('is_login');
   const firstName = localStorage.getItem('first_name');
   const lastName = localStorage.getItem('last_name');
-  const phoneNumber = localStorage.getItem('phone');
-  const emailAddress = localStorage.getItem('email');
+  const phoneNumber = localStorage.getItem('phone')
+  const emailAddress = localStorage.getItem("email")
   const customerDeliAddress = JSON.parse(localStorage.getItem("customer_details"));
-
+  const popupRef = useRef(null)
   const [grossAmount, setGrossAmount] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
 
@@ -71,11 +77,17 @@ const CartPage = () => {
   }
 
   const [formData, setFormData] = useState(initialValues);
-
   const [errors, setErrors] = useState({});
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (name, value) => {
+    setFormData((prevValues) => ({
+      ...prevValues,
+      [name]: value,
+    }));
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }));
   };
 
   const validateForm = () => {
@@ -90,8 +102,8 @@ const CartPage = () => {
       D_city,
       D_state,
       D_pinCode,
-
     } = formData;
+
     const errors = {};
     let isValid = true;
 
@@ -99,38 +111,62 @@ const CartPage = () => {
       isValid = false;
       errors.first_name = "First name is required.";
     }
+
     if (!last_name) {
       isValid = false;
       errors.last_name = "Last name is required.";
     }
+
     if (!phone) {
       isValid = false;
-      errors.phone = "Phone is required.";
+      errors.phone = "Mobile No is required.";
     }
+
+    else if (phone.length < 10) {
+      isValid = false;
+      errors.phone = "Mobile No must be at least 10 digits.";
+    }
+
+    else if (phone.length > 15) {
+      isValid = false;
+      errors.phone = "Mobile No cannot exceed 15 digits.";
+    }
+
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!email) {
       isValid = false;
       errors.email = "Email is required.";
     }
+    else if (!emailPattern.test(email)) {
+      isValid = false;
+      errors.email = "Enter a valid email (e.g., abc@gmail.com).";
+    }
+
     if (!D_houseNo) {
       isValid = false;
       errors.D_houseNo = "House no. is required.";
     }
+
     if (!D_building) {
       isValid = false;
       errors.D_building = "Building no. is required.";
     }
+
     if (!D_roadName) {
       isValid = false;
       errors.D_roadName = "Road name is required.";
     }
+
     if (!D_city) {
       isValid = false;
       errors.D_city = "City is required.";
     }
+
     if (!D_state) {
       isValid = false;
       errors.D_state = "State is required.";
     }
+
     if (!D_pinCode) {
       isValid = false;
       errors.D_pinCode = "Pin Code is required.";
@@ -142,13 +178,15 @@ const CartPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) {
       return;
     }
 
     const payload = {
       customer_id: custId,
+      D_Name: formData.D_Name,
+      D_phoneNum: formData.D_phoneNum,
+      D_Email: formData.D_Email,
       D_pinCode: formData.D_pinCode,
       D_state: formData.D_state,
       D_city: formData.D_city,
@@ -219,14 +257,6 @@ const CartPage = () => {
         });
 
         if (res.status === 200 && res.data.status) {
-          // Swal.fire({
-          //   position: "center", 
-          //   icon: "success",
-          //   title: `${res.data.message}`,
-          //   html: `<b>Order ID:</b> ${res.data.orderId}<br><b>Order Number:</b> ${res.data.orderNumber}`,
-          //   showConfirmButton: false,
-          //   timer: 3000, 
-          // });
           setCartCount(0)
           setCartItems([])
           localStorage.removeItem("cartItems")
@@ -282,24 +312,65 @@ const CartPage = () => {
     return price * item.quantity;
   };
 
-
-  const handleRemove = (productId, isWholesale) => {
-    removeFromCart(productId, isWholesale);
+  const handleRemove = (productId, isWholesale, quantity) => {
+    removeFromCart(productId, isWholesale, quantity);
     const existingCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
     const updatedCartItems = existingCartItems.filter(
-      (item) => item.itemId !== productId || item.isWholesale !== isWholesale
+      (item) => item.item_cd !== productId || item.isWholesale !== isWholesale || item.quantity !== quantity
     );
     localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
     setCartCount(updatedCartItems.length);
   };
 
+  const handleTogglePrice = (productId, newQuantity, isWholesale) => {
+    togglePriceType(productId, newQuantity, isWholesale);
+  }
+
   const handleQuantityChange = (productId, newQuantity, isWholesale) => {
     updateQuantity(productId, newQuantity, isWholesale);
   };
 
-  const handleTogglePrice = (productId) => {
-    togglePriceType(productId);
+  // redeem functionnility
+  // Handle input changes
+  const handleAvailableValueChange = (e) => {
+    const value = e.target.value;
+    setAvailableValue(value);
   };
+
+  const handleFinalRedeemValueChange = () => {
+    const newFinalValue = redeemValue - availableValue;
+    setFinalRedeemValue(newFinalValue);
+  };
+
+  const togglePopup = () => {
+    setIsPopupOpen(!isPopupOpen);
+    // Calculate redemption value on opening the popup
+    const calculatedRedeemValue = previousValue + redeemBalance;
+    setRedeemValue(calculatedRedeemValue);
+  };
+
+  const toggleShowPopup = () => {
+    setShowPopup(!showPopup);
+  };
+
+  const handleClickOutside = (event) => {
+    if (!popupRef.current.contains(event.target)) {
+      setShowPopup(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showPopup) {
+      document.addEventListener('click', handleClickOutside);
+    } else {
+      document.removeEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showPopup]);
+
 
   return (
     <>
@@ -307,7 +378,7 @@ const CartPage = () => {
         <div className="wrapperCont w-[100%] h-[100%] flex md:flex-row flex-col justify-between px-5 md:px-28">
           <div className="left w-[100%] md:w-[67%] flex flex-col gap-5">
             <div className="logInuserDetails shadow-xl bg-[#fdfbfbde] w-[100%] h-[10vh] md:h-[30vh] rounded-md p-2">
-              <div className="logo flex leading-tight gap-4 justify-start items-center">
+              <div className="logo flex leading-tight gap-4 justify-start items-center mt-3">
                 <VscAccount size={25} />
                 <div className="heading">
                   <h1 className='font-semibold text-[3vw] md:text-[1.3vw] text-[#FBBF36]'>Account</h1>
@@ -343,7 +414,6 @@ const CartPage = () => {
                 </div>
               )}
             </div>
-
             <div className="addressDetails shadow-xl bg-[#fdfbfbde] w-[100%] h-auto md:h-auto flex flex-col gap-3 rounded-md p-2">
 
               <div className="logo flex justify-start items-center gap-2">
@@ -383,16 +453,15 @@ const CartPage = () => {
                 <div className="modal absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
                   <div className="bg-white p-5 rounded-md w-[400px] max-w-[90%] md:w-[400px] shadow-lg overflow-y-auto max-h-[90vh]">
                     <h2 className="text-lg font-semibold mb-3 text-center">Enter Address</h2>
-
-                    <div className="flex flex-col gap-3">
-                    <div>
+                    <div className='grid grid-cols-2 gap-1 mb-2'>
+                      <div>
                         <input
                           type="text"
                           name="first_name"
                           placeholder="First name"
                           value={formData.first_name || ""}
-                          onChange={handleChange}
-                          className="border p-2 rounded w-full"
+                          onChange={(event) => handleChange("first_name", event.target.value)}
+                          className="border p-1 rounded w-full"
                           autoComplete='off'
                         />
                         <div className="text-red-500 text-sm">
@@ -405,23 +474,35 @@ const CartPage = () => {
                           name="last_name"
                           placeholder="Last name"
                           value={formData.last_name || ""}
-                          onChange={handleChange}
-                          className="border p-2 rounded w-full"
+                          onChange={(event) => handleChange("last_name", event.target.value)}
+                          minLength={10}
+                          maxLength={15}
+                          className="border p-1 rounded w-full"
                           autoComplete='off'
                         />
                         <div className="text-red-500 text-sm">
                           {!formData.last_name && errors.last_name}
                         </div>
                       </div>
+                    </div>
+                    <div className='grid grid-cols-2 gap-1 mb-2'>
                       <div>
                         <input
                           type="text"
                           name="phone"
-                          placeholder="Mobile number"
+                          placeholder="Phone"
                           value={formData.phone || ""}
-                          onChange={handleChange}
-                          className="border p-2 rounded w-full"
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            if (!/^\d*$/.test(value)) {
+                              return;
+                            }
+                            handleChange("phone", value);
+                          }}
+                          className="border p-1 rounded w-full"
                           autoComplete='off'
+                          minLength={10}
+                          maxLength={15}
                         />
                         <div className="text-red-500 text-sm">
                           {!formData.phone && errors.phone}
@@ -433,36 +514,26 @@ const CartPage = () => {
                           name="email"
                           placeholder="Email"
                           value={formData.email || ""}
-                          onChange={handleChange}
-                          className="border p-2 rounded w-full"
+                          onChange={(event) => handleChange("email", event.target.value)}
+                          minLength={10}
+                          maxLength={15}
+                          className="border p-1 rounded w-full"
                           autoComplete='off'
                         />
                         <div className="text-red-500 text-sm">
                           {!formData.email && errors.email}
                         </div>
                       </div>
-                      <div>
-                        <input
-                          type="text"
-                          name="D_houseNo"
-                          placeholder="House Number"
-                          value={formData.D_houseNo || ""}
-                          onChange={handleChange}
-                          className="border p-2 rounded w-full"
-                          autoComplete='off'
-                        />
-                        <div className="text-red-500 text-sm">
-                          {!formData.D_houseNo && errors.D_houseNo}
-                        </div>
-                      </div>
+                    </div>
+                    <div className="flex flex-col gap-3">
                       <div>
                         <input
                           type="text"
                           name="D_building"
                           placeholder="Building Name"
                           value={formData.D_building || ""}
-                          onChange={handleChange}
-                          className="border p-2 rounded w-full"
+                          onChange={(event) => handleChange("D_building", event.target.value)}
+                          className="border p-1 rounded w-full"
                           autoComplete='off'
                         />
                         <div className="text-red-500 text-sm">
@@ -475,8 +546,8 @@ const CartPage = () => {
                           name="D_roadName"
                           placeholder="Road Name"
                           value={formData.D_roadName || ""}
-                          onChange={handleChange}
-                          className="border p-2 rounded w-full"
+                          onChange={(event) => handleChange("D_roadName", event.target.value)}
+                          className="border p-1 rounded w-full"
                           autoComplete='off'
                         />
                         <div className="text-red-500 text-sm">
@@ -489,8 +560,8 @@ const CartPage = () => {
                           name="D_city"
                           placeholder="City"
                           value={formData.D_city || ""}
-                          onChange={handleChange}
-                          className="border p-2 rounded w-full"
+                          onChange={(event) => handleChange("D_city", event.target.value)}
+                          className="border p-1 rounded w-full"
                           autoComplete='off'
                         />
                         <div className="text-red-500 text-sm">
@@ -502,9 +573,9 @@ const CartPage = () => {
                           type="text"
                           name="D_state"
                           placeholder="State"
-                          value={formData.D_state}
-                          onChange={handleChange}
-                          className="border p-2 rounded w-full"
+                          value={formData.D_state || ""}
+                          onChange={(event) => handleChange("D_state", event.target.value)}
+                          className="border p-1 rounded w-full"
                           autoComplete='off'
                         />
                         <div className="text-red-500 text-sm">
@@ -516,9 +587,15 @@ const CartPage = () => {
                           type="text"
                           name="D_pinCode"
                           placeholder="Pin Code"
-                          value={formData.D_pinCode}
-                          onChange={handleChange}
-                          className="border p-2 rounded w-full"
+                          value={formData.D_pinCode || ""}
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            if (!/^\d*$/.test(value)) {
+                              return;
+                            }
+                            handleChange("D_pinCode", value);
+                          }}
+                          className="border p-1 rounded w-full"
                           autoComplete='off'
                           maxLength={6}
                         />
@@ -527,12 +604,11 @@ const CartPage = () => {
                         </div>
                       </div>
                     </div>
-
                     <div className="flex justify-between mt-4">
-                      <button onClick={() => setShowModal(false)} className="bg-red-500 text-white px-4 py-2 rounded w-[45%]">
+                      <button onClick={() => setShowModal(false)} className="border-[0.01vw] border-yellow-400  px-4 py-2 rounded-3xl w-[45%] hover:bg-yellow-400 hover:text-white">
                         Cancel
                       </button>
-                      <button onClick={handleSubmit} className="bg-green-500 text-white px-4 py-2 rounded w-[45%]">
+                      <button onClick={handleSubmit} className="bg-yellow-400 text-white px-4 py-2 w-[45%] rounded-3xl">
                         Save
                       </button>
                     </div>
@@ -540,7 +616,6 @@ const CartPage = () => {
                 </div>
               )}
             </div>
-
             <div className="paymentDetails  shadow-2xl bg-[#fdfbfbde]] w-[100%] h-[10vh] md:h-[20vh] flex flex-col gap-3  rounded-md p-2">
               <div className="logo flex justify-start items-center gap-2">
                 <IoWalletOutline size={20} />
@@ -551,33 +626,30 @@ const CartPage = () => {
               </div>
             </div>
           </div>
-
           <div className="right w-[100%] md:mt-0 mt-5 md:w-[30%] h-[60vh] md:h-[79vh] flex flex-col justify-between gap-2  rounded-md p-1">
             {cartItems.length === 0 ? (
               <p className='ml-2'>Your cart is empty.</p>
             ) : (
-              <div className="fixedPartTop w-[100%] h-[90%] md:h-[70%] flex border-[0.1vw] rounded-md p-2 border-zinc-300 shadow-xl flex-col overflow-y-auto">
+              <div className="fixedPartTop relative w-[100%] h-[90%] md:h-[70%] flex border-[0.1vw] rounded-md p-2 border-zinc-300 shadow-xl flex-col overflow-y-auto">
                 {cartItems.map((item) => (
                   <div
-                    key={item.id}
+                    key={item.item_cd}
                     className="cart-item mb-2 w-[100%] shadow-lg  flex border-b-[0.1vw] items-center justify-center px-1 border-orange-600"
                   >
                     <div className="cartleft bg-red-400 w-[20%] flex justify-center items-center h-[7vh]">
-                      <div className="cartImgWrapper h-[100%] w-[100%]">
+                      <div className="cartImgWrapper h-[100%] w-[100%]" onClick={() => navigate(`/product/${item.item_cd}`, { state: { details: item } })}>
                         <img
-                          src={item.
-                            item_images[0]}
-                          alt={item.item_name
+                          src={item.item_images[0]
                           }
+                          alt={item.item_name}
                           className="cart-item-image h-[100%] w-[100%]"
                         />
                       </div>
                     </div>
                     <div className="cartright w-[80%]">
                       <div className="cart-item-details w-[100%] flex justify-between">
-                        <div className="textWrapper px-3">
-                          <h3 className=" text-[2vw] md:text-[0.8vw] font-semibold">{item.item_name
-                          }</h3>
+                        <div className="textWrapper pl-3 w-[50%]">
+                          <h3 className=" text-[2vw] md:text-[0.7vw] font-semibold">{item.item_name}</h3>
                           <p className="md:text-[0.7vw] text-[2vw]">
                             <strong></strong>
                             {item.isWholesale
@@ -606,7 +678,8 @@ const CartPage = () => {
                               onChange={(e) =>
                                 handleQuantityChange(
                                   item.item_cd,
-                                  parseInt(e.target.value)
+                                  parseInt(e.target.value),
+                                  item.isWholesale
                                 )
                               }
                             />
@@ -622,10 +695,13 @@ const CartPage = () => {
                           </div>
                         </div>
                         <button
-                          onClick={() => handleTogglePrice(item.item_cd)}
+                          onClick={() => {
+                            handleTogglePrice(item.item_cd, item.isWholesale, item.quantity);
+
+                          }}
                           className="toggle-price-btn text-[1.5vw] md:text-[0.9vw]"
                         >
-                          <div className="flex flex-row md:flex-col items-center">
+                          <div className="flex flex-row md:flex-col items-center justify-center">
                             Switch to{" "}
                             <span className="bg-[#FBBF10] px-1 text-white rounded-3xl font-semibold w-[10vw] md:w-[5vw] inline-block">
                               {item.isWholesale ? "Retail " : "Wholesale "}
@@ -634,11 +710,11 @@ const CartPage = () => {
                           </div>
                         </button>
                         <button
-                          onClick={() => handleRemove(item.item_cd, item.isWholesale)}
+                          onClick={() => handleRemove(item.item_cd, item.isWholesale, item.quantity)}
                           className="remove-item-btn"
                         >
                           <span
-                            className="p-1 rounded-md bg-red-600 inline-block"
+                            className="px-1 py-[0.09vw] rounded-md bg-red-600 inline-block"
                             aria-label="remove"
                           >
                             <IoClose className="text-white" size={15} />
@@ -648,10 +724,12 @@ const CartPage = () => {
                     </div>
                   </div>
                 ))}
+                <Link to='/product/:itemCdId'><button className='absolute bottom-[3%] right-3 bg-yellow-400 flex items-center text-[0.8vw] gap-1 px-1 rounded-sm text-black'><FaPlus className='text-white' />Add More Items</button></Link>
               </div>
             )}
 
-            <div className="billDetails w-[100%] rounded-md border-[0.1vw] border-yellow-500 h-[29%] ">
+
+            <div className="billDetails w-[100%] rounded-md border-[0.1vw] border-yellow-500 h-[29%] relative">
               <div className="fixedPart w-[100%] rounded-md h-[60%] flex flex-col overflow-y-auto">
                 <div className="">
                   <div className="flex justify-between px-3 py-1 items-center">
@@ -662,7 +740,52 @@ const CartPage = () => {
                 </div>
                 <div className="details text-[3vw] md:text-[0.8vw] px-3">
                   <p className='flex justify-between'>Offer Amount <span className='font-bold'>&#8377;{0}</span></p>
-                  <p className='flex justify-between redemm'>Redeem Code <input type="text" placeholder='Enter Redeem Code' className='border-[0.01vw] border-black px-2 rounded-xl' /> <span className='font-bold'>&#8377;{0}</span></p>
+
+                  <p className='flex justify-between redemm '>
+                    Redeem Code
+                    <input
+                      type="text"
+                      value={finalRedeemValue || 'Enter Redeem Code'}
+                      onClick={togglePopup}
+                      placeholder='Enter Redeem Code'
+                      className='border-[0.01vw] border-black px-2 rounded-xl'
+                    />
+                    <span className='font-bold'>&#8377;{finalRedeemValue}</span>
+                  </p>
+
+                  {/* Popup Section */}
+                  {isPopupOpen && (
+                    <div ref={popupRef} className="popup" style={{ position: 'absolute', top: '-100%', left: '50%', transform: 'translateX(-50%)', backgroundColor: 'white', padding: '20px', borderRadius: '10px', boxShadow: '0px 4px 8px rgba(0,0,0,0.2)', zIndex: "10" }}>
+                      <div>
+                        <p className='flex justify-between'>Redemption Balance: <span>&#8377;{redeemBalance}</span></p>
+                        <p className='flex justify-between'>Previous Value: <span>&#8377;{previousValue}</span></p>
+                        <p className='flex justify-between'>Redemption Value: <span>&#8377;{redeemValue}</span></p>
+                        <p className='flex justify-between'>Available Value:
+                          <input
+                            type="text"
+                            value={availableValue}
+                            onChange={handleAvailableValueChange}
+                            className=' text-right rounded-xl outline-none'
+                          />
+                        </p>
+                        <div className='btns flex justify-between px-10'>
+                          <button
+                            onClick={handleFinalRedeemValueChange}
+                            className="px-4 py-1 mt-3 bg-blue-500 text-white rounded-full"
+                          >
+                            Calculate
+                          </button>
+                          <button
+                            onClick={togglePopup}
+                            className="px-4 py-1 mt-3 ml-2 bg-red-500 text-white rounded-full"
+                          >
+                            Close
+                          </button></div>
+                      </div>
+                    </div>
+                  )}
+
+
                 </div>
               </div>
               <div className="totalPrice w-[100%] h-[40%] flex-col px-2 text-[1.0vw]  justify-between items-center">
@@ -672,8 +795,8 @@ const CartPage = () => {
                     <strong className='text-[2vw] md:text-[0.8vw]'>Payable Amount (Inclusive of all Tax)</strong>
                     <span
                       className="info cursor-pointer relative"
-                      onMouseEnter={() => setShowPopup(true)}
-                      onMouseLeave={() => setShowPopup(false)}
+                      onClick={toggleShowPopup}
+                    // onMouseLeave={() => setShowPopup(false)}
                     >
                       <IoMdInformationCircleOutline size={13} />
 
@@ -696,14 +819,13 @@ const CartPage = () => {
                 </div>
                 <div
                   onClick={handlePlaceOrder}
-                  className="orderPlaceBtn bg-yellow-500 px-1 flex items-center justify-center py-1 text-[3vw] md:text-[1vw] md:py-0 rounded-md">
-                  <button>Place Order</button>
+                  className="orderPlaceBtn bg-yellow-500 px-1 flex items-center justify-center py-1 text-[3vw] md:text-[1vw] md:py-0 rounded-md text-white">
+                  <button>Enquary</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </>
   );

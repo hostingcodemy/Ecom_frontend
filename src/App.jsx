@@ -61,18 +61,6 @@ const router = createBrowserRouter([
 
 const App = () => {
 
-  // useEffect(() => {
-  //   const handleBeforeUnload = (event) => {
-  //     localStorage.clear();
-  //   };
-
-  //   window.addEventListener('beforeunload', handleBeforeUnload);
-    
-  //   return () => {
-  //     window.removeEventListener('beforeunload', handleBeforeUnload);
-  //   };
-  // }, []);
-
   return (
     <FavoritesProvider>
       <UserProvider>

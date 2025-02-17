@@ -15,7 +15,7 @@ import DispatchPopup from './DespatchPopup';
 import {
   API_ALL_ORDERS,
   API_CATEGORIES,
-  API_SUB_CATEGORY
+  API_CATEGORY
 }
   from '../config/Api';
 import axios from 'axios';
@@ -25,6 +25,7 @@ const Nav = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const profileRef = useRef(null);
+  const dropdownMenuRef = useRef(null)
   const location = useLocation();
   const isOnFavouritePage = location.pathname === "/favourite";
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ const Nav = () => {
     try {
       const res = await axios({
         method: "POST",
-        url: `${API_SUB_CATEGORY}/${category_id}`,
+        url: `${API_CATEGORY}/${category_id}`,
       });
       const result = res?.data?.data;
       setSubCatData(result);
@@ -101,11 +102,10 @@ const Nav = () => {
 
 
   const handleCategoryClick = (category_id) => {
-    setSelectedCategoryId(prevSelectedId => prevSelectedId === category_id ? null : category_id);
+    setSelectedCategoryId((prevSelectedId) => (prevSelectedId === category_id ? null : category_id));
     fetchSubCategories(category_id);
-    setIsDropdownCatOpen((prevState) => !prevState);
+    setIsDropdownCatOpen((prev) => !prev);
   };
-
 
 
   useEffect(() => {
@@ -124,6 +124,8 @@ const Nav = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
@@ -166,9 +168,30 @@ const Nav = () => {
     localStorage.removeItem("role_name");
     localStorage.removeItem("is_login");
     localStorage.removeItem("customer_details");
+    localStorage.removeItem("cartItems");
 
     navigate('/');
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownCatOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleCategoryItemClick = (category) => {
+    handleCategoryClick(category.category_id);
+    toggleDropdown();
+  };
+
 
   return (
     <div className='NavBar w-[100%] relative'>
@@ -235,49 +258,62 @@ const Nav = () => {
         </ul>
       </div>
       <div className="navRow1 h-[9vh] border-b-2 border-zinc-200 w-[100%] px-4 flex items-center justify-between">
+
         <div className="navRow1Left md:block hidden w-[37%] relative">
-          <ul className='flex cursor-pointer items-center text-[1vw] gap-3 font-normal'>
+          <ul className="flex cursor-pointer items-center text-[1vw] gap-3 font-normal">
             {catData?.map((category) => (
-              <>
-                <li key={category.category_id} className={`${category.category_id === 6 ? 'hidden' : 'inline-block'
-                  }`}>
-                  <p
-                    key={category.category_id}
-                    className={`category flex gap-1 items-center ${selectedCategoryId === category.category_id ? 'text-yellow-400' : ''}`}
-                    onClick={() => handleCategoryClick(category.category_id)}
-                  >
-                    {category.category_name}
-                    <IoIosArrowDown />
-                  </p>
-                </li>
-              </>
+              <li
+                key={category.category_id}
+                className={`category ${category.category_id === 6 ? 'hidden' : 'inline-block'}`}
+              >
+                <p
+                  key={category.category_id}
+                  className={`category flex gap-1 items-center ${selectedCategoryId === category.category_id ? 'text-yellow-400' : ''
+                    }`}
+                  onClick={() => handleCategoryItemClick(category)}
+                >
+                  {category.category_name}
+                  <IoIosArrowDown />
+                </p>
+              </li>
             ))}
-            <li className='text-[#FBBF10]'>
+            <li className="text-[#FBBF10]">
               <p value="Sale">Offers</p>
             </li>
           </ul>
-        </div>
-        <div className={`dropdownMenuCategorywise absolute top-[55%] p-5 cursor-pointer bg-zinc-100 shadow-md rounded-md w-fit z-50 transition-transform duration-500 ease-in-out ${isDropdownCatOpen ? 'scale-100' : 'scale-0'
-          }`}
-          style={{ transformOrigin: 'top center' }}
-        >
-          <ul className="flex gap-4 categorycont">
-            {subCatData.map((item, index) => (
-              <li key={index} className="space-y-2">
-                <div className=" font-semibold text-center text-[1vw] text-zinc-700 bg-yellow-400 rounded-xl">{item.sub_category_name}</div>
-                <ul className="h space-y-2 border-t-[0.01vw] border-b-[0.2vw] hover:border-t-yellow-400 hover:border-b-yellow-400 border-b-zinc-200 pb-[0.2vw]">
-                  <div className='hover:border-b-yellow-400  border-b-[0.01vw] border-b-zinc-200 p-2'>
-                    {item.items.map((value, idx) => (
-                      <li key={idx} className="hover:border-b-yellow-400 text-[0.8vw] text-center text-zinc-600 hover:text-yellow-400 cursor-pointer flex items-center justify-start mb-2 gap-2">
-                        <span className='inline-block h-10 w-10'><img className='h-[100%] w-[100%] rounded-lg' src={value.item_images[0]} alt="" /></span>
-                        <span className='text-left'>{value.item_name}</span>
-                      </li>
-                    ))}
+
+          <div
+            ref={dropdownRef}
+            className={`dropdownMenuCategorywise absolute top-[190%] p-2 cursor-pointer bg-zinc-100 shadow-md rounded-md w-fit z-50 transition-transform duration-500 ease-in-out ${isDropdownCatOpen ? 'scale-100' : 'scale-0'
+              }`}
+            style={{ transformOrigin: 'top center' }}
+          >
+            <ul className="flex gap-4 categorycont">
+              {subCatData.map((item, index) => (
+                <li key={index} className="space-y-2">
+                  <div className="font-semibold text-center text-[1vw] text-zinc-700 bg-yellow-400 rounded-xl px-2">
+                    {item.sub_category_name}
                   </div>
-                </ul>
-              </li>
-            ))}
-          </ul>
+                  <ul className="category space-y-2 border-t-[0.01vw] border-b-[0.2vw] hover:border-t-yellow-400 hover:border-b-yellow-400 border-b-zinc-200 pb-[0.2vw] h-[25vh] overflow-y-hidden">
+                    <div className="hover:border-b-yellow-400 border-b-[0.01vw] border-b-zinc-200 p-2 h-[100%]">
+                      {item.bandings.map((value, idx) => (
+                        <li
+                          key={idx}
+                          className="hover:border-b-yellow-400 text-[1vw] font-semibold text-center text-zinc-600 hover:text-yellow-400 cursor-pointer flex items-center justify-start mb-2 gap-2"
+                        // onClick={() => navigate(`/product/${value.item_cd}`, { state: { details: value } })}
+                        >
+                          {/* <span className="inline-block h-10 w-10">
+                            <img className="h-[100%] w-[100%] rounded-lg" src={value.item_images[0]} alt="" />
+                          </span> */}
+                          <span className=" border-b-[0.01vw] border-yellow-400">{value.banding_name}</span>
+                        </li>
+                      ))}
+                    </div>
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         <div className="navRow1Middle Logo w-[25%] ml-10 flex sm:justify-center justify-start">
@@ -318,7 +354,7 @@ const Nav = () => {
                         <span>Profile</span>
                       </div>
                       <div className='flex items-center gap-3 p-2 hover:bg-[#FACC15] transition-all ease-in-out duration-300 cursor-pointer'
-                       onClick={() => {
+                        onClick={() => {
                           fetchOrderHistry();
                           handleOpenPopup();
                         }}>
@@ -329,7 +365,7 @@ const Nav = () => {
                         <MdSettings />
                         <span>Settings</span>
                       </div>
-                      <div className='flex items-center gap-3 p-2 hover:bg-[#FACC15] transition-all ease-in-out duration-300 cursor-pointer'   onClick={handleLogout}>
+                      <div onClick={handleLogout} className='flex items-center gap-3 p-2 hover:bg-[#FACC15] transition-all ease-in-out duration-300 cursor-pointer'>
                         <MdExitToApp />
                         <span>Logout</span>
                       </div>
@@ -362,7 +398,7 @@ const Nav = () => {
           <ul className='socialLinks flex gap-9'>
             <li>Facebook</li>
             <li>Instagram</li>
-            <li>LinkedIn</li>
+            <li>Pinterest</li>
           </ul>
         </div>
 

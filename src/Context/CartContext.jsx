@@ -8,18 +8,20 @@ export const CartProvider = ({ children }) => {
   const [isLogIn, setIsLogIn] = useState(false);
   const [isWholesale, setIsWholesale] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [orderDetails, setOrderDetails] = useState([]) 
+  const [orderDetails, setOrderDetails] = useState([]) //for order sucessfull and order id and sts 
 
   const addToCart = (product, quantity, isWholesale) => {
     setCartItems((prevItems) => {
-
       const existingItemIndex = prevItems.findIndex(
         (item) => item.item_cd === product.item_cd && item.isWholesale === isWholesale
       );
-
+  
       if (existingItemIndex > -1) {
         const updatedItems = [...prevItems];
         updatedItems[existingItemIndex].quantity += quantity;
+        console.log(updatedItems);
+        
+        localStorage.setItem('cartItems', JSON.stringify(updatedItems));
         return updatedItems;
       } else {
         const newItem = {
@@ -27,35 +29,60 @@ export const CartProvider = ({ children }) => {
           quantity,
           isWholesale,
         };
-        return [...prevItems, newItem];
+        const updatedItems = [...prevItems, newItem];
+        localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+        return updatedItems;
       }
     });
-    setCartCount((prevCount) => prevCount + quantity);
   };
+  
 
-  const removeFromCart = (productId, isWholesale) => {
-    setCartItems((prevItems) => prevItems.filter(item => !(item.item_cd === productId && item.isWholesale === isWholesale)));
+
+  const removeFromCart = (productId, isWholesale, quantity) => {
+    setCartItems((prevItems) => {
+      const updatedItems = prevItems.filter(
+        (item) => item.item_cd !== productId || item.isWholesale !== isWholesale || item.quantity !== quantity
+      );
+      localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+      return updatedItems;
+    });
   };
+  
+
 
   const updateQuantity = (productId, newQuantity, isWholesale) => {
-    setCartItems((prevItems) =>
-      prevItems.map(item =>
-        item.item_cd === productId && item.isWholesale === isWholesale
-          ? { ...item, quantity: newQuantity }
-          : item
-      )
-    );                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-  };                                                                                                                       
-
-  const togglePriceType = (productId) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.item_cd === productId
-          ? { ...item, isWholesale: !item.isWholesale }
-          : item
-      )
-    );
+    setCartItems((prevItems) => {
+      const updatedItems = prevItems.map((item) => {
+        if (item.item_cd === productId && item.isWholesale === isWholesale ) {
+          return {
+            ...item,
+            quantity: Math.max(newQuantity, 1),
+          };
+        }
+        return item;
+      });
+      localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+      return updatedItems;
+    });
   };
+
+
+  const togglePriceType = (productId, isWholesale, quantity) => {
+    setCartItems((prevItems) => {
+      const updatedItems = prevItems.map((item) => {
+        if (item.item_cd === productId && item.isWholesale === isWholesale && item.quantity === quantity) {
+          return {
+            ...item,
+            isWholesale: !isWholesale,
+          };
+        }
+        return item;
+      });
+      localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+      return updatedItems;
+    });
+  };
+
 
   // confetti function
   const handleConfetti = () => {
@@ -64,6 +91,8 @@ export const CartProvider = ({ children }) => {
       setShowConfetti(false);
     }, 3000);
   };
+
+
 
   return (
     <CartContext.Provider value={{
