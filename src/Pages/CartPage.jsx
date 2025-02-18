@@ -377,7 +377,7 @@ const CartPage = () => {
       <div className="cart-page relative p-3 flex flex-col gap-2" >
         <div className="wrapperCont w-[100%] h-[100%] flex md:flex-row flex-col justify-between px-5 md:px-28">
           <div className="left w-[100%] md:w-[67%] flex flex-col gap-5">
-            <div className="logInuserDetails shadow-xl bg-[#fdfbfbde] w-[100%] h-[10vh] md:h-[30vh] rounded-md p-2">
+            <div className="logInuserDetails shadow-xl bg-[#fdfbfbde] w-[100%] h-[13vh] md:h-[30vh] rounded-md p-2">
               <div className="logo flex leading-tight gap-4 justify-start items-center mt-3">
                 <VscAccount size={25} />
                 <div className="heading">
